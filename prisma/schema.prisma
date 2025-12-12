@@ -1,0 +1,128 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// -------------------------
+//  ENUMS
+// -------------------------
+enum PlanType {
+  BASIC
+  PRO
+  ENTERPRISE
+}
+
+enum CandidateStatus {
+  PENDING
+  REJECTED
+  SHORTLISTED
+  INTERVIEW
+}
+
+// -------------------------
+//  MODELS
+// -------------------------
+
+model Company {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password      String
+
+  planType      PlanType  @default(BASIC)
+
+  jobDescriptions JobDescription[]
+  candidates      Candidate[]
+  emailLogs       EmailLog[]
+
+  createdAt     DateTime @default(now())
+}
+
+
+// -------------------------
+//  SUBSCRIPTION PLAN LIMITS
+// -------------------------
+model SubscriptionPlan {
+  id            String   @id @default(cuid())
+  type          PlanType @unique
+  maxResumes    Int
+  maxFilters    Int
+  scheduling    Boolean // interview scheduling available?
+
+  createdAt     DateTime @default(now())
+}
+
+
+// -------------------------
+//  JOB DESCRIPTION
+// -------------------------
+model JobDescription {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+
+  title       String
+  content     String   // full JD text
+
+  candidates  Candidate[]
+
+  createdAt   DateTime @default(now())
+}
+
+
+// -------------------------
+//  CANDIDATE + RESUME
+// -------------------------
+model Candidate {
+  id              String   @id @default(cuid())
+  companyId       String
+  company         Company  @relation(fields: [companyId], references: [id])
+
+  jobDescriptionId String
+  jobDescription   JobDescription @relation(fields: [jobDescriptionId], references: [id])
+
+  name            String
+  email           String
+  resumeUrl       String   // Supabase storage / local / S3 URL
+
+  score           Int?
+  analysis        String?  // AI explanation summary
+  status          CandidateStatus @default(PENDING)
+
+  // interview
+  interviewSlot   String?  // e.g. "2025-12-14 14:00"
+
+  createdAt       DateTime @default(now())
+}
+
+
+
+// -------------------------
+//  EMAIL LOGS
+// -------------------------
+model EmailLog {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id])
+
+  candidateId String?
+  candidate   Candidate? @relation(fields: [candidateId], references: [id])
+
+  type        String   // rejection, acceptance, scheduling, etc.
+  to          String
+  subject     String
+  body        String
+
+  createdAt   DateTime @default(now())
+}
+

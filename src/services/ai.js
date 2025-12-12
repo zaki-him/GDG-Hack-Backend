@@ -37,7 +37,7 @@ ${resumeText}
       },
       {
         headers: {
-          Authorization: `Bearer YOUR_HF_API_KEY`,
+          Authorization: `Bearer ${process.env.HF_API_KEY}`,
           "Content-Type": "application/json"
         }
       }

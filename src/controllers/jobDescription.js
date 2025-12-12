@@ -3,7 +3,8 @@ import prisma from "../config/prisma.js";
 const jobDescription = async (req, res) => {
   try {
     const { companyName, title, content } = req.body
-    const company = await prisma.company.findUnique({
+    console.log(prisma)
+    const company = await prisma.company.findFirst({
       where: { name: companyName }
     })
 
@@ -11,7 +12,7 @@ const jobDescription = async (req, res) => {
       return res.status(404).json({ message: 'Company Not Found' })
     }
 
-    const job = await prisma.job.create({
+    const job = await prisma.jobDescription.create({
       data: {
         title, content, companyId: company.id
       }

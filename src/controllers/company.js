@@ -5,7 +5,7 @@ export const createCompany = async (req, res) => {
   try {
     const { name, password, email, planType } = req.body;
 
-    const salt = bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const company = await prisma.company.create({

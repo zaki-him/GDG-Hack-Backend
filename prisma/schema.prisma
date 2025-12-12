@@ -5,12 +5,13 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
+  
 }
 
 datasource db {
   provider = "postgresql"
+    url    = env("DATABASE_URL")
 }
 
 // -------------------------
@@ -34,95 +35,90 @@ enum CandidateStatus {
 // -------------------------
 
 model Company {
-  id            String    @id @default(cuid())
-  name          String
-  email         String    @unique
-  password      String
+  id       String @id @default(cuid())
+  name     String
+  email    String @unique
+  password String
 
-  planType      PlanType  @default(BASIC)
+  planType PlanType @default(BASIC)
 
   jobDescriptions JobDescription[]
   candidates      Candidate[]
   emailLogs       EmailLog[]
 
-  createdAt     DateTime @default(now())
+  createdAt DateTime @default(now())
 }
-
 
 // -------------------------
 //  SUBSCRIPTION PLAN LIMITS
 // -------------------------
 model SubscriptionPlan {
-  id            String   @id @default(cuid())
-  type          PlanType @unique
-  maxResumes    Int
-  maxFilters    Int
-  scheduling    Boolean // interview scheduling available?
+  id         String   @id @default(cuid())
+  type       PlanType @unique
+  maxResumes Int
+  maxFilters Int
+  scheduling Boolean // interview scheduling available?
 
-  createdAt     DateTime @default(now())
+  createdAt DateTime @default(now())
 }
-
 
 // -------------------------
 //  JOB DESCRIPTION
 // -------------------------
 model JobDescription {
-  id          String   @id @default(cuid())
-  companyId   String
-  company     Company  @relation(fields: [companyId], references: [id])
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
 
-  title       String
-  content     String   // full JD text
+  title   String
+  content String // full JD text
 
-  candidates  Candidate[]
+  candidates Candidate[]
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 }
-
 
 // -------------------------
 //  CANDIDATE + RESUME
 // -------------------------
 model Candidate {
-  id              String   @id @default(cuid())
-  companyId       String
-  company         Company  @relation(fields: [companyId], references: [id])
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
 
   jobDescriptionId String
   jobDescription   JobDescription @relation(fields: [jobDescriptionId], references: [id])
 
-  name            String
-  email           String
-  resumeUrl       String   // Supabase storage / local / S3 URL
+  name      String
+  email     String
+  resumeUrl String // Supabase storage / local / S3 URL
 
-  score           Int?
-  analysis        String?  // AI explanation summary
-  status          CandidateStatus @default(PENDING)
+  score    Int?
+  analysis String? // AI explanation summary
+  status   CandidateStatus @default(PENDING)
 
   // interview
-  interviewSlot   String?  // e.g. "2025-12-14 14:00"
+  interviewSlot String? // e.g. "2025-12-14 14:00"
 
-  createdAt       DateTime @default(now())
+  createdAt DateTime   @default(now())
+  emailLogs EmailLog[]
 }
-
-
 
 // -------------------------
 //  EMAIL LOGS
 // -------------------------
 model EmailLog {
-  id          String   @id @default(cuid())
-  companyId   String
-  company     Company  @relation(fields: [companyId], references: [id])
+  id        String  @id @default(cuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
 
   candidateId String?
   candidate   Candidate? @relation(fields: [candidateId], references: [id])
 
-  type        String   // rejection, acceptance, scheduling, etc.
-  to          String
-  subject     String
-  body        String
+  type    String // rejection, acceptance, scheduling, etc.
+  to      String
+  subject String
+  body    String
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 }
-

@@ -62,6 +62,6 @@ export async function analyzeJob(req, res, next) {
 
     res.json({ processedCount: processed.length, processed });
   } catch (err) {
-    next(err);
+    res.json({ err: err.message })
   }
 }

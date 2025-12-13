@@ -20,6 +20,6 @@ router.post('/analyze/:jobId', analyzeJob)
 
 router.post('/filter/:jobId', applyFilter)
 
-router.post('/schduele/:jobId', scheduleInterviews)
+router.post('/schedule/:jobId', scheduleInterviews)
 
 export default router
